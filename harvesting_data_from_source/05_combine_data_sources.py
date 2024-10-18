@@ -189,10 +189,16 @@ for variant, canonicals in disease_variant_to_canonical.items():
         inverted_index_lookup_canonical_to_variants[canonical].add(variant)
 
 for term_to_delete in diseases_to_exclude_under_all_variants:
-    variants = inverted_index_lookup_canonical_to_variants[term_to_delete]
-    for variant in variants:
-        del disease_variant_to_canonical[variant]
-    del disease_canonical_to_data[term_to_delete]
+    if term_to_delete not in disease_variant_to_canonical:
+        print(f"Warning! tried to delete {term_to_delete} but couldn't find it")
+        continue
+    canonicals_to_delete = disease_variant_to_canonical[term_to_delete]
+    for canonical_to_delete in canonicals_to_delete:
+
+        variants = inverted_index_lookup_canonical_to_variants[canonical_to_delete]
+        for variant in variants:
+            del disease_variant_to_canonical[variant]
+        del disease_canonical_to_data[canonical_to_delete]
 
 with bz2.open("../src/medical_named_entity_recognition/disease_ner_dictionary.pkl.bz2", "wb") as f:
     pkl.dump(

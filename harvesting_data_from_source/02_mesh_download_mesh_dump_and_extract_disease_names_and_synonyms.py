@@ -96,7 +96,7 @@ class CustomContentHandler(xml.sax.ContentHandler):
             # if True or self.title.upper() in drugs_finder.drug_variant_to_canonical:
             is_include = False
             for t in self.tree_numbers:
-                if t.startswith("C"):
+                if t.startswith("C") or t.startswith("F"):
                     is_include = True
                 # else:
                 #     is_include = False
