@@ -1,6 +1,6 @@
 [project]
 name = "medical-named-entity-recognition"
-version = "1.0.0"
+version = "0.1beta"
 description = "Medical Named Entity Recognition library to find and resolve disease names in a string (disease named entity linking)"
 readme = "README.md"
 keywords = ['medicine', 'bio', 'biomedical', 'medical', 'pharma', 'pharmaceutical', 'ner', 'nlp', 'named entity recognition', 'natural language processing', 'named entity linking', 'clinical', 'ehr', 'electronic health record']
