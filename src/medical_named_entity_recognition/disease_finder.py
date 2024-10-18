@@ -28,11 +28,14 @@ SOFTWARE.
 '''
 
 import bz2
-import os
 import pathlib
 import pickle as pkl
+import re
 from collections import Counter
 
+re_apostrophe = re.compile(r"'|’")
+
+from medical_named_entity_recognition.util import stopwords
 
 this_path = pathlib.Path(__file__).parent.resolve()
 
@@ -170,11 +173,15 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
         cand_norm = cand.lower()
 
         match = disease_variant_to_canonical.get(cand_norm, None)
+        if match is None:
+            cand_norm_2 = re_apostrophe.sub("", cand_norm)
+            disease_variant_to_canonical.get(cand_norm_2, None)
 
         if match:
 
             for m in match:
-                match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm, {})
+                match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm,
+                                                                                                              {})
                 match_data["match_type"] = "exact"
                 match_data["matching_string"] = cand
 
@@ -200,9 +207,14 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
             continue
         cand_norm = token.lower()
         match = disease_variant_to_canonical.get(cand_norm, None)
+        if match is None:
+            cand_norm_2 = re_apostrophe.sub("", cand_norm)
+            disease_variant_to_canonical.get(cand_norm_2, None)
+
         if match:
             for m in match:
-                match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm, {})
+                match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm,
+                                                                                                              {})
                 match_data["match_type"] = "exact"
                 match_data["matching_string"] = token
                 disease_matches.append((match_data, token_idx, token_idx))
@@ -220,10 +232,9 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
                         match_data["matching_string"] = token
                         disease_matches.append((match_data, token_idx, token_idx + 1))
 
-
     return disease_matches
 
 
 reset_diseases_data()
 
-print (find_diseases("cystic fibrosis".split()))
+print(find_diseases("cystic fibrosis".split()))

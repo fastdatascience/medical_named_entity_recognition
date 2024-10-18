@@ -29,12 +29,16 @@ SOFTWARE.
 
 import bz2
 import csv
-import json
 import pathlib
 import pickle as pkl
 import re
 
 from nltk.corpus import words
+
+re_apostrophe = re.compile(r"'s\b")
+
+from harvesting_data_from_source.inclusions import diseases_to_exclude_under_all_variants, \
+    extra_terms_to_exclude_from_disease_dictionary
 
 re_num = re.compile(r'^\d+$')
 re_three_digits = re.compile(r'\d\d\d')
@@ -48,8 +52,10 @@ disease_variant_to_variant_data = {}
 
 def add_canonical(canonical: str, data: dict):
     canonical_norm = canonical.lower().strip()
-    if canonical_norm in disease_variant_to_canonical and canonical_norm not in disease_variant_to_canonical[canonical_norm]:
-        print(f"Adding canonical {canonical_norm} but it already maps to {disease_variant_to_canonical[canonical_norm]}")
+    if canonical_norm in disease_variant_to_canonical and canonical_norm not in disease_variant_to_canonical[
+        canonical_norm]:
+        print(
+            f"Adding canonical {canonical_norm} but it already maps to {disease_variant_to_canonical[canonical_norm]}")
         canonical_norm = disease_variant_to_canonical[canonical_norm][0]
     elif canonical_norm not in disease_variant_to_canonical:
         data["name"] = canonical
@@ -62,17 +68,22 @@ def add_canonical(canonical: str, data: dict):
 def add_synonym(synonym: str, canonical: str, synonym_data: dict = None):
     canonical_norm = canonical.lower().strip()
     synonym_norm = synonym.lower().strip()
-    if synonym_norm not in disease_variant_to_canonical:
-        disease_variant_to_canonical[synonym_norm] = [canonical_norm]
-    else:
-        if canonical_norm not in disease_variant_to_canonical:
-            disease_variant_to_canonical[synonym_norm].append(canonical_norm)
-    if synonym_data is not None:
-        if synonym_norm not in disease_variant_to_variant_data:
-            disease_variant_to_variant_data[synonym_norm] = synonym_data
+    synonym_norms = [synonym_norm]
+    if len(re_apostrophe.findall(synonym_norm)) > 0:
+        synonym_norms.append(re_apostrophe.sub("s", synonym_norm))
+        synonym_norms.append(re_apostrophe.sub("’s", synonym_norm))
+    for synonym_norm in synonym_norms:
+        if synonym_norm not in disease_variant_to_canonical:
+            disease_variant_to_canonical[synonym_norm] = [canonical_norm]
         else:
-            disease_variant_to_variant_data[synonym_norm] = disease_variant_to_variant_data[synonym_norm] | synonym_data
-
+            if canonical_norm not in disease_variant_to_canonical:
+                disease_variant_to_canonical[synonym_norm].append(canonical_norm)
+        if synonym_data is not None:
+            if synonym_norm not in disease_variant_to_variant_data:
+                disease_variant_to_variant_data[synonym_norm] = synonym_data
+            else:
+                disease_variant_to_variant_data[synonym_norm] = disease_variant_to_variant_data[
+                                                                    synonym_norm] | synonym_data
 
 
 with open(this_path.joinpath("diseases_dictionary_mesh.csv"), 'r', encoding="utf-8") as csvfile:
@@ -92,11 +103,10 @@ with open(this_path.joinpath("diseases_dictionary_mesh.csv"), 'r', encoding="utf
         canonical = common_name
         add_canonical(canonical, data)
         for synonym in generic_names:
-            add_synonym(synonym, canonical, {"is_brand": False})
+            add_synonym(synonym, canonical)  # , {"is_brand": False})
         add_synonym(common_name, canonical)
         for synonym in synonyms:
             add_synonym(synonym, canonical)
-
 
 # Remove common English words
 
@@ -113,8 +123,10 @@ for word in list(disease_variant_to_canonical):
     reason = None
     if word in stops:
         reason = "it is an English word in stopword list"
-    # elif len(word) < 4:
-    #     reason = "it is short"
+    elif word in extra_terms_to_exclude_from_disease_dictionary:
+        reason = "it is in the manual ignore list"
+    elif len(word) < 3:
+        reason = "it is short"
     # elif len(re_num.findall(word)) > 0:
     #     reason = "it is numeric"
     # elif len(word) > 50:
@@ -167,6 +179,20 @@ for canonical in list(disease_canonical_to_data):
     if canonical not in canonical_has_variants_pointing_to_it:
         print(f"removing data for {canonical} because there are no synonyms pointing to it")
         del disease_canonical_to_data[canonical]
+
+# Hard delete some terms in all variants e.g. blood glucose
+inverted_index_lookup_canonical_to_variants = dict()
+for variant, canonicals in disease_variant_to_canonical.items():
+    for canonical in canonicals:
+        if canonical not in inverted_index_lookup_canonical_to_variants:
+            inverted_index_lookup_canonical_to_variants[canonical] = set()
+        inverted_index_lookup_canonical_to_variants[canonical].add(variant)
+
+for term_to_delete in diseases_to_exclude_under_all_variants:
+    variants = inverted_index_lookup_canonical_to_variants[term_to_delete]
+    for variant in variants:
+        del disease_variant_to_canonical[variant]
+    del disease_canonical_to_data[term_to_delete]
 
 with bz2.open("../src/medical_named_entity_recognition/disease_ner_dictionary.pkl.bz2", "wb") as f:
     pkl.dump(

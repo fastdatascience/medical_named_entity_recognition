@@ -98,9 +98,9 @@ class CustomContentHandler(xml.sax.ContentHandler):
             for t in self.tree_numbers:
                 if t.startswith("C"):
                     is_include = True
-                else:
-                    is_include = False
-                    break
+                # else:
+                #     is_include = False
+                #     break
                 # if len(t.split('.')) < 4:
                 #     is_include = False
                 #     break
