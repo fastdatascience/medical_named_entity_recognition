@@ -23,7 +23,7 @@
 
 <!-- badges: end -->
 
-# 💊 Medical Named Entity Recognition
+# ⚕️ Medical Named Entity Recognition
 
 Developed by Fast Data Science, https://fastdatascience.com
 
