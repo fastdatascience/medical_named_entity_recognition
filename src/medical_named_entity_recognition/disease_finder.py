@@ -167,40 +167,47 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
     is_exclude = set()
 
     # Search for 2 token sequences
-    for token_idx, token in enumerate(tokens[:-1]):
-        next_token = tokens[token_idx + 1]
-        cand = token + " " + next_token
-        cand_norm = cand.lower()
+    for seq_length in range(5, 0, -1):
+        for token_idx, token in enumerate(tokens[:-(seq_length - 1)]):
+            cand = " ".join(tokens[token_idx:token_idx + seq_length])
+            cand_norm = cand.lower()
 
-        match = disease_variant_to_canonical.get(cand_norm, None)
-        if match is None:
-            cand_norm_2 = re_apostrophe.sub("", cand_norm)
-            disease_variant_to_canonical.get(cand_norm_2, None)
 
-        if match:
 
-            for m in match:
-                match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm,
-                                                                                                              {})
-                match_data["match_type"] = "exact"
-                match_data["matching_string"] = cand
+            match = disease_variant_to_canonical.get(cand_norm, None)
+            if match is None:
+                cand_norm_2 = re_apostrophe.sub("", cand_norm)
+                disease_variant_to_canonical.get(cand_norm_2, None)
 
-                disease_matches.append((match_data, token_idx, token_idx + 1))
-                is_exclude.add(token_idx)
-                is_exclude.add(token_idx + 1)
-        elif is_fuzzy_match:
-            if token.lower() not in stopwords and next_token.lower() not in stopwords:
-                fuzzy_matched_variant, similarity = get_fuzzy_match(cand_norm)
-                if fuzzy_matched_variant is not None:
-                    match = disease_variant_to_canonical[fuzzy_matched_variant]
-                    for m in match:
-                        match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(
-                            fuzzy_matched_variant, {})
-                        match_data["match_type"] = "fuzzy"
-                        match_data["match_similarity"] = similarity
-                        match_data["match_variant"] = fuzzy_matched_variant
-                        match_data["matching_string"] = cand
-                        disease_matches.append((match_data, token_idx, token_idx + 1))
+            if match:
+
+                for m in match:
+                    match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(cand_norm,
+                                                                                                                  {})
+                    match_data["match_type"] = "exact"
+                    match_data["matching_string"] = cand
+
+                    disease_matches.append((match_data, token_idx, token_idx + 1))
+                    is_exclude.add(token_idx)
+                    is_exclude.add(token_idx + 1)
+            elif is_fuzzy_match:
+                is_token_in_stopwords = False
+                for token in tokens[token_idx:token_idx + seq_length]:
+                    if token.lower() in stopwords:
+                        is_token_in_stopwords = True
+
+                if not is_token_in_stopwords:
+                    fuzzy_matched_variant, similarity = get_fuzzy_match(cand_norm)
+                    if fuzzy_matched_variant is not None:
+                        match = disease_variant_to_canonical[fuzzy_matched_variant]
+                        for m in match:
+                            match_data = dict(disease_canonical_to_data.get(m, {})) | disease_variant_to_variant_data.get(
+                                fuzzy_matched_variant, {})
+                            match_data["match_type"] = "fuzzy"
+                            match_data["match_similarity"] = similarity
+                            match_data["match_variant"] = fuzzy_matched_variant
+                            match_data["matching_string"] = cand
+                            disease_matches.append((match_data, token_idx, token_idx + 1))
 
     for token_idx, token in enumerate(tokens):
         if token_idx in is_exclude:

@@ -56,9 +56,11 @@ You pass a list of strings to the `find_diseases` function.
 Example 1
 
 ```
+import re
+re_tokenise = re.compile(r"((?:\w|'|’)+)")
 from medical_named_entity_recognition import find_diseases
 tokens = re_tokenise.findall("cystic fibrosis")
-find_diseases(tokens, is_ignore_case=True)
+find_diseases(tokens)
 ```
 
 outputs a list of tuples.

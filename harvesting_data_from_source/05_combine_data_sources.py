@@ -121,12 +121,29 @@ all_english_vocab = set([w.lower() for w in words.words()])
 words_to_check_with_ai = set()
 for word in list(disease_variant_to_canonical):
     reason = None
+
+    canonical = disease_variant_to_canonical[word][0]
+
+    tree_ids = disease_canonical_to_data[canonical]["mesh_tree"]
+    is_psychological = False
+    for tree_id in tree_ids:
+        if tree_id.startswith("F"):
+            is_psychological= True
+
+    is_two_english_words = False
+    if len(word.split()) == 2:
+        words = word.split()
+        if words[0] in all_english_vocab and words[1] in all_english_vocab:
+            is_two_english_words =True
+
     if word in stops:
         reason = "it is an English word in stopword list"
     elif word in extra_terms_to_exclude_from_disease_dictionary:
         reason = "it is in the manual ignore list"
     elif len(word) < 3:
         reason = "it is short"
+    elif is_two_english_words and is_psychological:
+        words_to_check_with_ai.add(word)
     # elif len(re_num.findall(word)) > 0:
     #     reason = "it is numeric"
     # elif len(word) > 50:
