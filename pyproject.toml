@@ -41,7 +41,7 @@ dependencies = [
 dev = ["check-manifest", "pytest", "nltk", "pandas"]
 
 [project.urls]
-"Documentation" = "https://fastdatascience.com/drug-named-entity-recognition-python-library/"
+"Documentation" = "https://fastdatascience.com/ai-in-pharma/medical-named-entity-recognition-python-library/"
 "Bug Reports" = "https://github.com/fastdatascience/medical_named_entity_recognition/issues"
 "Source Code" = "https://github.com/fastdatascience/medical_named_entity_recognition"
 
