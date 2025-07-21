@@ -13,4 +13,4 @@ A quick description of the requested feature.
 
 ## Rationale
 
-A rationale for why the feature should be implemented in the Medical Python library
+A rationale for why the feature should be implemented in the Medical Named Entity Recognition Python library
