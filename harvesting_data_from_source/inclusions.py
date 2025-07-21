@@ -46,6 +46,7 @@ diseases_to_exclude_under_all_variants = {
     "respect",
     "thinking",
     "norm",
+    "confidentiality",
     "character",
     "orientation",
     "attention",
@@ -64,10 +65,12 @@ diseases_to_exclude_under_all_variants = {
     "hearing",
     "illiteracy",
     "opinion",
-    "emergency"
+    "emergency",
+    "role",
 }
 
 extra_terms_to_exclude_from_disease_dictionary = {
+    "affects",
     "ability",
     "abreaction",
     "absenteeism",
@@ -292,7 +295,7 @@ extra_terms_to_exclude_from_disease_dictionary = {
     "concept learning",
     "conceptualization",
     "conditioned reflex",
-    "confidentiality",
+
     "conflict resolution",
     "confusion",
     "conscience",
@@ -322,6 +325,8 @@ extra_terms_to_exclude_from_disease_dictionary = {
     "core balance",
     "core stability",
     "corpse",
+    "counseling",
+    "social skills",
     "cortical vigilance",
     "countertransference",
     "couple therapy",
@@ -1167,7 +1172,6 @@ extra_terms_to_exclude_from_disease_dictionary = {
     "risk reduction",
     "road rage",
     "rod vision",
-    "role",
     "role concept",
     "role conflict",
     "role strain",

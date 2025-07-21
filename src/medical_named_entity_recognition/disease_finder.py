@@ -154,7 +154,7 @@ def get_fuzzy_match(surface_form: str):
     return None, None
 
 
-def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
+def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None, is_allow_overlapping_disease_names=True):
     """
 
     @param tokens:
@@ -210,7 +210,7 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None):
                             disease_matches.append((match_data, token_idx, token_idx + 1))
 
     for token_idx, token in enumerate(tokens):
-        if token_idx in is_exclude:
+        if not is_allow_overlapping_disease_names and token_idx in is_exclude:
             continue
         cand_norm = token.lower()
         match = disease_variant_to_canonical.get(cand_norm, None)

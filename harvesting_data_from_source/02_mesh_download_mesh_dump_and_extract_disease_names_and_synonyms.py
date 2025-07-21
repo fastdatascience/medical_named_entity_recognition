@@ -1,4 +1,3 @@
-
 '''
 MIT License
 
@@ -40,7 +39,6 @@ from sys import platform
 mesh_xml_file_name = f"desc{datetime.datetime.now().year}.xml"
 url = f"https://nlmpubs.nlm.nih.gov/projects/mesh/MESH_FILES/xmlmesh/{mesh_xml_file_name}"
 
-'''
 if os.path.exists(mesh_xml_file_name):
     print(f"Removing old XML file {mesh_xml_file_name}.")
     os.remove(mesh_xml_file_name)
@@ -55,7 +53,6 @@ else:
     wget = subprocess.Popen(["wget", url])
 
 os.waitpid(wget.pid, 0)
-'''
 
 print(f"Downloaded MeSH XML dump from {url}.")
 
@@ -105,7 +102,8 @@ class CustomContentHandler(xml.sax.ContentHandler):
                 #     is_include = False
                 #     break
             if is_include:
-                self.writer.writerow([self.id, "|".join(self.generic_names), self.title, "|".join(self.terms), "|".join(self.tree_numbers)])
+                self.writer.writerow([self.id, "|".join(self.generic_names), self.title, "|".join(self.terms),
+                                      "|".join(self.tree_numbers)])
                 print(self.id, self.title, self.tree_numbers, self.terms)
             self.title = ""
             self.id = ""

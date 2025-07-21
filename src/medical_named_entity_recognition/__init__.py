@@ -27,6 +27,6 @@ SOFTWARE.
 
 '''
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 from medical_named_entity_recognition.disease_finder import find_diseases

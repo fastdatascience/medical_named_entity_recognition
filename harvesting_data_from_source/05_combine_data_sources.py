@@ -86,6 +86,20 @@ def add_synonym(synonym: str, canonical: str, synonym_data: dict = None):
                                                                     synonym_norm] | synonym_data
 
 
+re_neoplasm = re.compile(r'(?i)neoplasms?\b')
+re_tumor = re.compile(r'(?i)tumou?rs?\b')
+
+
+def expand_synonym(term: str):
+    if len(re_neoplasm.findall(term)) > 0:
+        return [re_neoplasm.sub("cancer", term), re_neoplasm.sub("cancers", term), re_neoplasm.sub("tumor", term),
+                re_neoplasm.sub("tumors", term), re_neoplasm.sub("tumour", term), re_neoplasm.sub("tumours", term)]
+    if len(re_tumor.findall(term)) > 0:
+        return [re_tumor.sub("cancer", term), re_tumor.sub("cancers", term), re_tumor.sub("neoplasm", term),
+                re_tumor.sub("neoplasms", term)]
+    return []
+
+
 with open(this_path.joinpath("diseases_dictionary_mesh.csv"), 'r', encoding="utf-8") as csvfile:
     csv_reader = csv.reader(csvfile, delimiter=',')
     headers = None
@@ -108,6 +122,12 @@ with open(this_path.joinpath("diseases_dictionary_mesh.csv"), 'r', encoding="utf
         for synonym in synonyms:
             add_synonym(synonym, canonical)
 
+all_variants = list(disease_variant_to_canonical)
+for variant in all_variants:
+    for expanded_synonym in expand_synonym(variant):
+        if expanded_synonym not in disease_variant_to_canonical:
+            add_synonym(expanded_synonym, disease_variant_to_canonical[variant][0])
+
 # Remove common English words
 
 print("Finding all diseases that are also in the NLTK list of English words.")
@@ -128,13 +148,13 @@ for word in list(disease_variant_to_canonical):
     is_psychological = False
     for tree_id in tree_ids:
         if tree_id.startswith("F"):
-            is_psychological= True
+            is_psychological = True
 
     is_two_english_words = False
     if len(word.split()) == 2:
         words = word.split()
         if words[0] in all_english_vocab and words[1] in all_english_vocab:
-            is_two_english_words =True
+            is_two_english_words = True
 
     if word in stops:
         reason = "it is an English word in stopword list"

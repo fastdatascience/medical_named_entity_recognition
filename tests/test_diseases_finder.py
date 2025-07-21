@@ -34,8 +34,20 @@ from medical_named_entity_recognition.disease_finder import find_diseases
 
 class TestDiseaseFinder(unittest.TestCase):
 
-    def test_diseases_1(self):
-        diseases = find_diseases("cystic fibrosis".split(" "))
+    def test_diseases_no_overlap(self):
+        diseases = find_diseases("cystic fibrosis".split(" "), is_allow_overlapping_disease_names=False)
 
         self.assertEqual(1, len(diseases))
         self.assertEqual("Cystic Fibrosis", diseases[0][0]['name'])
+
+    def test_diseases_allow_overlap(self):
+        diseases = find_diseases("cystic fibrosis".split(" "))
+
+        self.assertEqual(2, len(diseases))
+        self.assertEqual("Cystic Fibrosis", diseases[0][0]['name'])
+
+    def test_neuroendocrine(self):
+        diseases = find_diseases("Neuroendocrine Neoplasms".split(" "))
+
+        self.assertEqual(2, len(diseases))
+        self.assertEqual("Neuroendocrine Tumors", diseases[0][0]['name'])
