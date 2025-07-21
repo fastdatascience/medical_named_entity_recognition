@@ -67,6 +67,10 @@ diseases_to_exclude_under_all_variants = {
     "opinion",
     "emergency",
     "role",
+    "mothers",
+    "fathers",
+    "siblings",
+    "parents"
 }
 
 extra_terms_to_exclude_from_disease_dictionary = {
