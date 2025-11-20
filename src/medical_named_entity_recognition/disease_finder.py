@@ -243,5 +243,3 @@ def find_diseases(tokens: list, is_fuzzy_match=False, is_ignore_case=None, is_al
 
 
 reset_diseases_data()
-
-print(find_diseases("cystic fibrosis".split()))
